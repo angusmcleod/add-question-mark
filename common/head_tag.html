@@ -3,9 +3,16 @@
  
   api.modifyClass("component:composer-title", {
     keyDown(event) {
-      if (event.keyCode === 8 || event.keyCode === 46) {
+      const creatingPrivateMessage = this.get('composer.creatingPrivateMessage');
+      const isPrivateMessage = this.get('composer.topic.isPrivateMessage');
+
+      if (event.keyCode === 8 ||
+          event.keyCode === 46 ||
+          creatingPrivateMessage ||
+          isPrivateMessage) {
         return;
       }
+      
       const $title = this.$('#reply-title');
       const value = $title.val();
       if (value.length === 0) {
