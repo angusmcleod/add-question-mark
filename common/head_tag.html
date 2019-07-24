@@ -1,0 +1,35 @@
+<script type="text/discourse-plugin" version="0.8"> 
+  const observes = require("ember-addons/ember-computed-decorators").observes;
+ 
+  api.modifyClass("component:composer-title", {
+    keyDown(event) {
+      if (event.keyCode === 8 || event.keyCode === 46) {
+        return;
+      }
+      const $title = this.$('#reply-title');
+      const value = $title.val();
+      if (value.length === 0) {
+        $title.val('?');
+        this.setCaretPosition('reply-title', 0);
+      }
+    },
+    
+    setCaretPosition(elemId, caretPos) {
+      var elem = document.getElementById(elemId);
+      if (elem != null) {
+        if (elem.createTextRange) {
+          var range = elem.createTextRange();
+          range.move('character', caretPos);
+          range.select();
+        } else {
+          if (elem.selectionStart) {
+            elem.focus();
+            elem.setSelectionRange(caretPos, caretPos);
+          } else {
+            elem.focus();
+          }  
+        }
+      }
+    }
+  });
+</script>
