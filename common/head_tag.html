@@ -5,17 +5,36 @@
     keyDown(event) {
       const creatingPrivateMessage = this.get('composer.creatingPrivateMessage');
       const isPrivateMessage = this.get('composer.topic.isPrivateMessage');
+      const keyCode = event.keyCode;
 
-      if (event.keyCode === 8 ||
-          event.keyCode === 46 ||
-          creatingPrivateMessage ||
-          isPrivateMessage) {
+      if (creatingPrivateMessage || isPrivateMessage) {
         return;
       }
       
       const $title = this.$('#reply-title');
-      const value = $title.val();
-      if (value.length === 0) {
+      const deleteKey = keyCode === 46;
+      const backspaceKey = keyCode === 8;
+      let value = $title.val();
+      
+      if (deleteKey || backspaceKey) {
+        let sel = this.getInputSelection($title[0]);
+        let deletedText;
+        
+        console.log(sel, value);
+        
+        if (sel.length) {
+          deletedText = value.slice(sel.start, sel.end);
+        } else {
+          deletedText = value.charAt(deleteKey ? sel.start : sel.start - 1);
+        }
+        
+        if (deletedText.indexOf('?') > -1) {
+          event.preventDefault();
+          deletedText = deletedText.replace('?','');
+          value = value.replace(deletedText, '');
+          $title.val(value);
+        }
+      } else if (value.length === 0) {
         $title.val('?');
         this.setCaretPosition('reply-title', 0);
       }
@@ -37,6 +56,37 @@
           }  
         }
       }
+    },
+    
+    getInputSelection(input) {
+      let start = 0;
+      let end = 0;
+      
+      input.focus();
+      
+      if (typeof input.selectionStart == "number" &&
+          typeof input.selectionEnd == "number") {
+        start = input.selectionStart;
+        end = input.selectionEnd;
+      } else if (document.selection && document.selection.createRange) {
+        var range = document.selection.createRange();
+        if (range) {
+          var inputRange = input.createTextRange();
+          var workingRange = inputRange.duplicate();
+          var bookmark = range.getBookmark();
+          inputRange.moveToBookmark(bookmark);
+          workingRange.setEndPoint("EndToEnd", inputRange);
+          end = workingRange.text.length;
+          workingRange.setEndPoint("EndToStart", inputRange);
+          start = workingRange.text.length;
+        }
+      }
+
+      return {
+        start: start,
+        end: end,
+        length: end - start
+      };
     }
   });
 </script>
